@@ -27,5 +27,5 @@ import pandas as pd
     # ... (code to handle pagination and extract the relevant fields)
     df = pd.DataFrame.from_records(results)
     df.to_csv('civil_rights_mtd_opinions.csv', index=False)
-    ```
-**Alternative:** If the API is complex, we can start with a pre-downloaded dataset from Harvard's Caselaw Access Project, though it requires more cleaning.
+```
+
