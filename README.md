@@ -11,3 +11,21 @@ Data Acquisition:
 import requests
 import json
 import pandas as pd
+ base_url = "https://www.courtlistener.com/api/rest/v3/search/"
+    params = {
+        'q': '("motion to dismiss") AND ("1983" OR "civil rights")',
+        'type': 'o', # o for opinions
+        'court': 'dists', # district courts
+        'filed_after': '2019-01-01',
+        'page_size': 100, # adjust as needed, will need to paginate
+    }
+    headers = {'Authorization': 'Token YOUR_API_KEY_HERE'} # You need to register for a free key
+
+    response = requests.get(base_url, params=params, headers=headers)
+    data = response.json()
+    results = data['results']
+    # ... (code to handle pagination and extract the relevant fields)
+    df = pd.DataFrame.from_records(results)
+    df.to_csv('civil_rights_mtd_opinions.csv', index=False)
+    ```
+**Alternative:** If the API is complex, we can start with a pre-downloaded dataset from Harvard's Caselaw Access Project, though it requires more cleaning.
