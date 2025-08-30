@@ -17,42 +17,6 @@ Setup & Installation
 git clone <your-repo-url>
 cd <your-repo-name>
 
-Create a virtual environment (recommended):
-bash
-
-# On Windows
-python -m venv venv
-.\venv\Scripts\activate
-
-# On macOS/Linux
-python3 -m venv venv
-source venv/bin/activate
-
-Install the required Python packages:
-bash
-
-    pip install -r requirements.txt
-
-    (The requirements.txt file should contain: requests pandas matplotlib seaborn)
-
-Configuration
-
-    Get your API Key:
-
-        Register for a free account at CourtListener.com.
-
-        Navigate to your profile's API Tokens section and generate a new token.
-
-    Set your API Key:
-
-        Open the 01_data_acquisition.py script.
-
-        Find the line that says API_KEY = "YOUR_API_KEY_HERE".
-
-        Replace the placeholder text with your actual API key, keeping it inside the quotes.
-
-        ⚠️ Important: Add api_key.py to your .gitignore file to avoid accidentally committing your secret key to GitHub.
-
 Usage: Running the Analysis Pipeline
 
 Execute the scripts in the following order:
@@ -61,23 +25,35 @@ Execute the scripts in the following order:
 This script fetches raw metadata for relevant court opinions from the CourtListener API.
 bash
 
-python 01_data_acquisition.py
+python data_acquisition.py
 
     What it does: Searches for opinions related to "motion to dismiss" and "42 U.S.C. § 1983". The results are saved to raw_opinions_data.csv.
 
     Note: The API's court filter can be unreliable. This script fetches a broad dataset and filters for district courts programmatically in the next step.
 
+    Note: you may need to edit the params, I had problems with getting the correct courts.
+
 2. Data Cleaning & Sampling
 This script fetches the full text for each opinion and prepares a sample for manual review.
 bash
 
-python 02_data_cleaning.py
+Python extract_download_url.py
+
+    What it does: extracted the url of the opionon in the csv. The results are saved to a new column.
+
+Python extract_opinion_id.py
+
+    What it does: extracted the opinion_id of the opionon in the csv. The results are saved to a new column.
+    
+python data_cleaning.py
 
     What it does:
 
-        Loads raw_opinions_data.csv.
+        Loads csv with the updated csv.
 
-        Makes individual API calls to fetch the full text (plain_text) for each opinion using its cluster_id.
+        Makes individual API calls to fetch the full text (plain_text) for each opinion using its opinion_id.
+
+        Makes individual API calls to fetch the url of the opinion in case there is no full text for each opinion using its                download_url.
 
         Creates a manageable random sample of opinions and saves it to sample_for_labeling.csv.
 
@@ -88,7 +64,7 @@ This is where you apply your legal expertise. This step cannot be automated.
 
     Open sample_for_labeling.csv in the spreadsheet software of your choice.
 
-    For each row, read the plain_text of the judicial opinion.
+    For each row, read the plain_text of the judicial opinion or use the download_url.
 
     In the motion_granted column, label the outcome:
 
@@ -104,38 +80,36 @@ This is where you apply your legal expertise. This step cannot be automated.
 This script analyzes your labeled data, runs SQL queries, and generates visualizations.
 bash
 
-python 03_analysis_and_viz.py
+python analysis_and_viz.py
 
     What it does:
 
-        Loads your manually labeled data from sample_for_labeling.csv.
+        Loads your manually labeled data from your edits above.
 
         Filters out rows labeled -1.
 
         Performs SQL analysis to calculate grant rates, trends over time, and variations by circuit.
 
-        Generates plots (grant_rate_trend.png, grant_rate_by_circuit.png) and saves them in the repository.
+        Generates plots (grant_rate_trend.png) and saves it in the repository.
 
         Prints key findings to the console.
 
 Files Overview
 
-    01_data_acquisition.py: Fetches data from the CourtListener API.
+    data_acquisition.py: Fetches data from the CourtListener API.
 
-    02_data_cleaning.py: Prepares data for manual labeling by fetching full text.
+    extract_download_url.py: adds new column to the csv file.
 
-    03_analysis_and_viz.py: Performs data analysis and creates visualizations.
+    extract_opinion_id.py: adds new column to the csv file.
 
-    sample_for_labeling.csv: Created by Step 2; used for manual labeling in Step 3.
+    data_cleaning.py: Prepares data for manual labeling by fetching full text.
 
-    requirements.txt: List of Python dependencies.
-
-    .gitignore: Specifies files to exclude from version control (e.g., api_key.py, *.csv).
+    analysis_and_viz.py: Performs data analysis and creates visualizations.
 
 Troubleshooting & Notes
 
     API Rate Limiting: The CourtListener API has strict rate limits for free tiers. If scripts fail with 429 or 401 errors, wait an hour before trying again.
 
-    No Results Found: If the acquisition script finds zero results, try simplifying the search query in 01_data_acquisition.py (e.g., just "motion to dismiss") to test the connection.
+    No Results Found: If the acquisition script finds zero results, try simplifying the search query in data_acquisition.py (e.g., just "motion to dismiss") to test the connection or change the params.
 
     Column Errors: If you encounter a KeyError, run print(df.columns.tolist()) in your script to see the exact column names returned by the API and adjust your code accordingly.
