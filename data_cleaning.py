@@ -33,7 +33,7 @@ df['motion_granted'] = None  # We will label this manually
 
 # 5. FETCH THE FULL TEXT FOR EACH OPINION
 # This step is necessary because the search results don't include it.
-API_KEY = "19e2018c0a5473097f90a331c8ca6efb1ecc3eeb"  # <<< REPLACE THIS WITH YOUR ACTUAL KEY
+API_KEY = "YOUR API KEY"  # <<< REPLACE THIS WITH YOUR ACTUAL KEY
 headers = {'Authorization': f'Token {API_KEY}'}
 
 def fetch_opinion_text(opinion_id):
@@ -79,4 +79,5 @@ df_sample = df.sample(n=500, random_state=42) # random_state for reproducibility
 
 # Save this sample to a new CSV file. This is the file you will MANUALLY label.
 df_sample.to_csv('sample_for_labeling.csv', index=False)
+
 print("Sample of 500 opinions saved to 'sample_for_labeling.csv'. Now for the manual work!")
